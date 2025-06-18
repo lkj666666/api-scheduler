@@ -1,0 +1,36 @@
+# .github/workflows/api-ping.yml
+name: Daily API Ping
+
+on:
+  schedule:
+    - cron: '0 18 * * *'  # 每天UTC时间1:00（北京时间9:00）
+  workflow_dispatch:     # 允许手动触发
+
+jobs:
+  ping-api:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm install axios
+      
+    - name: 执行接口调用
+      run: node api-caller-enhanced.js
+      
+    - name: 验证响应
+      # 检查响应是否包含预期内容
+      run: |
+        RESPONSE=$(node -e "require('./api-caller-enhanced.js').callApiWithRetry()")
+        if [[ $RESPONSE != *"success"* ]]; then
+          echo "::error::响应验证失败"
+          exit 1
+        fi
