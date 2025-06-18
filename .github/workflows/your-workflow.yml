@@ -1,0 +1,29 @@
+name: API Scheduler
+
+on:
+  schedule:
+    # 使用cron语法设置执行时间（UTC时间）
+    # - cron: '0 18 * * *'   # 每天UTC时间8:00执行（北京时间16:00）
+    - cron: '*/5 * * * *' # 每5分钟执行（测试用）
+
+jobs:
+  call-api:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: 安装依赖
+      run: npm install
+
+    - name: 执行API调用
+      run: npm start
+      env:
+        # 安全存储敏感信息（在仓库Settings > Secrets中设置）
+        API_TOKEN: ${{ secrets.API_TOKEN }}
